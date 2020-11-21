@@ -2,7 +2,7 @@ import Orphanage from "../models/Orphanage";
 import imagesView from "./images_view";
 
 export default {
-    render(orphanage: Orphanage) {
+    render(orphanage: Orphanage, host: string) {
         return {
             id: orphanage.id,
             name: orphanage.name,
@@ -12,11 +12,11 @@ export default {
             instructions: orphanage.instructions,
             opening_hours: orphanage.opening_hours,
             open_on_weekends: orphanage.open_on_weekends,
-            images: imagesView.renderMany(orphanage.images)
+            images: imagesView.renderMany(orphanage.images, host)
         }
     },
 
-    renderMany(orphanages: Orphanage[]) {
-        return orphanages.map(orphanage => this.render(orphanage));
+    renderMany(orphanages: Orphanage[], host: string) {
+        return orphanages.map(orphanage => this.render(orphanage, host));
     }
 };

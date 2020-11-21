@@ -16,17 +16,17 @@ export default {
             relations: ['images']
         });
 
-        return response.status(200).json(orphanagesView.render(orphanage));
+        return response.status(200).json(orphanagesView.render(orphanage, request.hostname));
     },
 
     async index(request: Request, response: Response) {
         const orphanagesRepository = getRepository(Orphanage);
-
+        
         const orphanages = await orphanagesRepository.find({
             relations: ['images']
         });
 
-        return response.status(200).json(orphanagesView.renderMany(orphanages));
+        return response.status(200).json(orphanagesView.renderMany(orphanages, request.hostname));
     },
 
     async create(request: Request, response: Response) {
