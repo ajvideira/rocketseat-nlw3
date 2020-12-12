@@ -1,21 +1,26 @@
 /* eslint-disable import/extensions */
 import React, { useState } from 'react';
 import {
-  ScrollView, View, Switch, Text, TextInput, TouchableOpacity,
+  ScrollView, View, Switch, Text, TextInput, TouchableOpacity, Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { RectButton } from 'react-native-gesture-handler';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 
 import styles from '../../styles/pages/OrphanageDataStyle';
+import api from '../../services/api';
 
-interface OrphanageDataRouteParam {
-  
+interface OrphanageDataRouteParams {
+  position: {
+    latitude: number;
+    longitude: number;
+  }
 }
 
 function OrphanageData() {
   const route = useRoute();
-  console.log(route.params);
+  const params = route.params as OrphanageDataRouteParams;
 
   const [name, setName] = useState('');
   const [about, setAbout] = useState('');
@@ -24,8 +29,60 @@ function OrphanageData() {
   const [opening_hours, setOpeningHours] = useState('');
   const [open_on_weekends, setOpenOnWeekends] = useState(false);
 
-  function handleCreateOrphanage() {
+  const [images, setImages] = useState<string[]>([])
 
+  const navigation = useNavigation();
+
+  async function handleCreateOrphanage() {
+    const {latitude, longitude} = params.position;
+
+    console.log({
+      name, about, instructions, opening_hours, open_on_weekends, latitude, longitude 
+    });
+
+    const data = new FormData();
+    data.append('name', name);
+    data.append('about', about);
+    data.append('latitude', String(latitude));
+    data.append('longitude', String(longitude));
+    data.append('instructions', instructions);
+    data.append('opening_hours', opening_hours);
+    data.append('open_on_weekends', String(open_on_weekends));
+    images.forEach((image, index) => {
+      data.append('images', {
+        type: 'image/jpg',
+        uri: image,
+        name: `images_${index}.jpg`
+      } as any);
+    });
+
+    await api.post('orphanages', data);
+
+    navigation.navigate('OrphanagesMap');
+
+  }
+
+  async function handleSelectImages() {
+    console.log('chegou aqui')
+
+    const {status} = await ImagePicker.requestCameraRollPermissionsAsync();
+
+    if (status !== 'granted') {
+      alert('Você precisa fornecer permissão para adicionar imagens!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images
+    });
+
+    if (result.cancelled) {
+      return;
+    }
+  
+    setImages([...images, result.uri]);
   }
 
   return (
@@ -49,7 +106,22 @@ function OrphanageData() {
       />*/}
 
       <Text style={styles.label}>Fotos</Text>
-      <TouchableOpacity style={styles.imagesInput} onPress={() => { }}>
+
+      <View style={styles.uploadedImageContainer}>
+        {
+          images.map((image) => {
+            return (
+              <Image
+                key={image} 
+                source={{uri: image}} 
+                style={styles.uploadedImage}
+              />
+            );
+          })
+        }
+      </View>
+
+      <TouchableOpacity style={styles.imagesInput} onPress={handleSelectImages}>
         <Feather name="plus" size={24} color="#15B6D6" />
       </TouchableOpacity>
 
@@ -61,7 +133,7 @@ function OrphanageData() {
         multiline
       />
 
-      <Text style={styles.label}>Horario de visitas</Text>
+      <Text style={styles.label}>Horário de visitas</Text>
       <TextInput value={opening_hours} onChangeText={setOpeningHours}
         style={styles.input}
       />

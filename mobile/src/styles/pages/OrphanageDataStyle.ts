@@ -71,6 +71,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFF',
   },
+
+  uploadedImageContainer: {
+    flexDirection: 'row'
+  },
+
+  uploadedImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    marginBottom: 32,
+    marginRight: 8
+  }
 });
 
 export default styles;

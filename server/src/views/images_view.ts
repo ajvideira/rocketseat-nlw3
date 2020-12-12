@@ -4,7 +4,7 @@ export default {
     render(image: Image, host: string) {
         return {
             id: image.id,
-            url: `${host.includes("localhost") ? process.env.HOST_SERVER_TO_WEB : process.env.HOST_SERVER_TO_APP}/uploads/${image.path}`
+            url: `${host.includes("localhost") ? "localhost:3333" : process.env.HOST_SERVER_TO_APP}/uploads/${image.path}`
         }
     },
 
